@@ -39,7 +39,7 @@ jobs:
             --since-commit ${{ github.event.pull_request.base.sha }} \
             --branch ${{ github.event.pull_request.head.sha }} \
             --fail \
-            .
+            --repo_path .
 
       # --- Set up Python ---
       - name: Set up Python
