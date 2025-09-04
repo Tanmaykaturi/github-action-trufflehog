@@ -1,40 +1,24 @@
-name: TruffleHog Secret Scan
+name: Secret Scan with TruffleHog
 
 on:
   pull_request:
     branches:
-      - main
+      - main   # Trigger when PR targets main
 
 jobs:
-  secret-scan:
+  trufflehog-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Required for trufflehog to scan git history
 
-      - name: Install TruffleHog v3
+      - name: Install TruffleHog
         run: |
-          VERSION="3.90.5"
-          OS="$(uname | tr '[:upper:]' '[:lower:]')"
-          ARCH="$(uname -m)"
-          if [[ $ARCH == "x86_64" ]]; then
-            ARCH="amd64"
-          elif [[ $ARCH == "aarch64" || $ARCH == "arm64" ]]; then
-            ARCH="arm64"
-          fi
-          FILE="trufflehog_${VERSION}_${OS}_${ARCH}.tar.gz"
-          URL="https://github.com/trufflesecurity/trufflehog/releases/download/v${VERSION}/${FILE}"
-          echo "Downloading TruffleHog v${VERSION} from ${URL}"
-          wget -q "${URL}" -O trufflehog.tar.gz
-          tar -xzf trufflehog.tar.gz
-          sudo mv trufflehog /usr/local/bin/
+          curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh
 
-      - name: Run TruffleHog secret scan
+      - name: Run TruffleHog Secret Scan
         run: |
-          echo "🔍 Running TruffleHog secret scan on PR changes..."
-          trufflehog git \
-            --since-commit ${{ github.event.pull_request.base.sha }} \
-            --branch ${{ github.event.pull_request.head.sha }} \
-            --fail \
-            --repo_path .
+          ./trufflehog git file://. --only-verified --fail
