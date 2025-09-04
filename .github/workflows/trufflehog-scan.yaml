@@ -3,7 +3,7 @@ name: PR Secret Scan with TruffleHog
 on:
   pull_request:
     branches:
-      - main   # Run only when PR is raised against main
+      - main
 
 jobs:
   trufflehog-scan:
@@ -13,12 +13,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Needed for commit comparisons
+          fetch-depth: 0   # Required for comparing commits
 
       - name: Install TruffleHog
         run: |
           curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh
           echo "$HOME/.local/bin" >> $GITHUB_PATH
+          echo "/usr/local/bin" >> $GITHUB_PATH
+          which trufflehog || true
+          trufflehog --version || true
 
       - name: Run TruffleHog on PR commits
         run: |
