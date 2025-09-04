@@ -1,0 +1,38 @@
+name: PR Security & Code Quality Scan
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  scan-and-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # --- Secret Scanning with TruffleHog ---
+      - name: Run TruffleHog on PR changes
+        run: |
+          echo "🔍 Running TruffleHog secret scan..."
+          trufflehog git file://. \
+            --since-commit ${{ github.event.pull_request.base.sha }} \
+            --branch ${{ github.event.pull_request.head.sha }} \
+            --fail
+
+      # --- Set up Python ---
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install flake8
+        run: pip install flake8
+
+      # --- Python Linting ---
+      - name: Run flake8 (Python Linter)
+        run: |
+          echo "🔍 Running Python lint check..."
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
