@@ -16,7 +16,18 @@ jobs:
       # --- Install TruffleHog v3 (binary release) ---
       - name: Install TruffleHog v3
         run: |
-          wget https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_$(uname -s)_$(uname -m).tar.gz -O trufflehog.tar.gz
+          VERSION="3.90.5"
+          OS="$(uname | tr '[:upper:]' '[:lower:]')"
+          ARCH="$(uname -m)"
+          if [[ $ARCH == "x86_64" ]]; then
+            ARCH="amd64"
+          elif [[ $ARCH == "aarch64" || $ARCH == "arm64" ]]; then
+            ARCH="arm64"
+          fi
+          FILE="trufflehog_${VERSION}_${OS}_${ARCH}.tar.gz"
+          URL="https://github.com/trufflesecurity/trufflehog/releases/download/v${VERSION}/${FILE}"
+          echo "Downloading TruffleHog v${VERSION} from ${URL}"
+          wget "${URL}" -O trufflehog.tar.gz
           tar -xzf trufflehog.tar.gz
           sudo mv trufflehog /usr/local/bin/
 
