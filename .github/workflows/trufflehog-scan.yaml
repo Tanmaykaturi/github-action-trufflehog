@@ -3,7 +3,7 @@ name: Secret Scan with TruffleHog
 on:
   pull_request:
     branches:
-      - main   # Trigger when PR targets main
+      - main
 
 jobs:
   trufflehog-scan:
@@ -13,12 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Required for trufflehog to scan git history
+          fetch-depth: 0   # Required for commit history scan
 
       - name: Install TruffleHog
         run: |
           curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Run TruffleHog Secret Scan
         run: |
-          ./trufflehog git file://. --only-verified --fail
+          trufflehog git file://. --only-verified --fail
