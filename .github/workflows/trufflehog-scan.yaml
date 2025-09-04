@@ -13,11 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # --- Install TruffleHog ---
-      - name: Install TruffleHog
+      # --- Install TruffleHog v3 (binary release) ---
+      - name: Install TruffleHog v3
         run: |
-          python3 -m pip install --upgrade pip
-          pip install trufflehog
+          wget https://github.com/trufflesecurity/trufflehog/releases/latest/download/trufflehog_$(uname -s)_$(uname -m).tar.gz -O trufflehog.tar.gz
+          tar -xzf trufflehog.tar.gz
+          sudo mv trufflehog /usr/local/bin/
 
       # --- Secret Scanning with TruffleHog ---
       - name: Run TruffleHog on PR changes
