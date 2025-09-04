@@ -13,6 +13,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # --- Install TruffleHog ---
+      - name: Install TruffleHog
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install trufflehog
+
       # --- Secret Scanning with TruffleHog ---
       - name: Run TruffleHog on PR changes
         run: |
