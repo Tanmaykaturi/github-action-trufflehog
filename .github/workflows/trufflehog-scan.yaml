@@ -1,4 +1,4 @@
-name: PR Security & Code Quality Scan
+name: TruffleHog Secret Scan
 
 on:
   pull_request:
@@ -6,14 +6,13 @@ on:
       - main
 
 jobs:
-  scan-and-lint:
+  secret-scan:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # --- Install TruffleHog v3 (binary release) ---
       - name: Install TruffleHog v3
         run: |
           VERSION="3.90.5"
@@ -27,31 +26,15 @@ jobs:
           FILE="trufflehog_${VERSION}_${OS}_${ARCH}.tar.gz"
           URL="https://github.com/trufflesecurity/trufflehog/releases/download/v${VERSION}/${FILE}"
           echo "Downloading TruffleHog v${VERSION} from ${URL}"
-          wget "${URL}" -O trufflehog.tar.gz
+          wget -q "${URL}" -O trufflehog.tar.gz
           tar -xzf trufflehog.tar.gz
           sudo mv trufflehog /usr/local/bin/
 
-      # --- Secret Scanning with TruffleHog ---
-      - name: Run TruffleHog on PR changes
+      - name: Run TruffleHog secret scan
         run: |
-          echo "🔍 Running TruffleHog secret scan..."
+          echo "🔍 Running TruffleHog secret scan on PR changes..."
           trufflehog git \
             --since-commit ${{ github.event.pull_request.base.sha }} \
             --branch ${{ github.event.pull_request.head.sha }} \
             --fail \
             --repo_path .
-
-      # --- Set up Python ---
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.x'
-
-      - name: Install flake8
-        run: pip install flake8
-
-      # --- Python Linting ---
-      - name: Run flake8 (Python Linter)
-        run: |
-          echo "🔍 Running Python lint check..."
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
